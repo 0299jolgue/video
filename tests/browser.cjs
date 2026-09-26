@@ -22,6 +22,17 @@ const probe=file=>JSON.parse(execFileSync('ffprobe',['-v','error','-show_streams
   await page.fill('[name=username]','admin');await page.fill('[name=password]','admin123');await page.click('button[type=submit]');
   await page.waitForFunction(()=>document.querySelector('#status')?.textContent.startsWith('Ready.'));
   assert.equal(await page.locator('.scene').count(),5);
+  assert.equal(await page.inputValue('#lower'),'2500');
+  assert.equal(await page.inputValue('#upper'),'3000');
+  assert.equal(await page.locator('#rankName').textContent(),'Gold III → Diamond I');
+  await page.fill('#score','3075');
+  assert.equal(await page.inputValue('#lower'),'3000');
+  assert.equal(await page.inputValue('#upper'),'3500');
+  await page.fill('#score','2683');
+  await page.selectOption('#format','original');
+  const [referenceFrame]=await Promise.all([page.waitForEvent('download'),page.click('#png')]);
+  await referenceFrame.saveAs('tests/output/aligned-frame.png');
+  await page.selectOption('#format','vertical');
   await page.selectOption('#quality','720');await page.selectOption('#celebration','masters');
   await page.screenshot({path:'tests/output/desktop.png',fullPage:true});
   await page.click('#export');await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('MP4 ready'),null,{timeout:120000});
