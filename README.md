@@ -1,46 +1,29 @@
 # Rank Clip Studio
 
-Editor web em português para criar vídeos com a imagem base aprovada. Arranca com **`python main.py`** em **`0.0.0.0:80`** (não 8080).
+An editor for assembling ranked-result clips from your own screenshots, icons, and ending videos. Run `python main.py`; the server listens on **port 80** by default.
 
-## Hospedagem Python
+## Setup
 
-1. Instalar dependências: `pip install -r requirements.txt`.
-2. Definir o inicializador como `main.py`.
-3. Definir a porta como `80` e iniciar com `python main.py`.
-4. Abrir o endereço HTTPS fornecido pela hospedagem.
+```sh
+pip install -r requirements.txt
+python main.py
+```
 
-Não é necessário Node, base de dados ou chave de API. O navegador faz a composição; o servidor converte a gravação em MP4 H.264/AAC. A dependência `imageio-ffmpeg` fornece um executável FFmpeg quando o sistema não o tem. Se o servidor não tiver FFmpeg, a interface informa e oferece o formato nativo do navegador. As conversões são temporárias e os ficheiros são apagados no fim da resposta.
+For Docker: `docker build -t rank-video .` followed by `docker run --rm -p 80:80 rank-video`. Set `PORT` only for local development. The hosting entry point is `main.py` and its default port is 80, not 8080. FFmpeg renders H.264 MP4; `imageio-ffmpeg` supplies a binary if the system has none.
 
-Alternativa Docker: `docker build -t rank-video .` e `docker run --rm -p 80:80 rank-video`.
+Sign in with the temporary account **admin / admin123**. Set `ADMIN_USER`, `ADMIN_PASSWORD`, and `SESSION_SECRET` as environment variables to change it and retain sessions across restarts.
 
-## Utilização
+## Editing
 
-- Configurar as cinco cenas iniciais; adicionar, duplicar ou remover cenas (1–12).
-- Os pontos finais, ganhos, limites e duração são independentes por cena.
-- Carregar PNGs transparentes dos ícones reais dos ranks e escolher os ícones de cada cena. Não estão incluídos ícones oficiais nem são descarregados automaticamente.
-- Ajustar as posições no painel de coordenadas se usares outro template.
-- Escolher formato vertical (720×1280 / 1080×1920) ou original (1080×720 / 1620×1080). O modo vertical conserva a imagem completa, com fundo preto (como no exemplo) ou desfocado.
-- Carregar música opcional e, para um final idêntico ao jogo, uma gravação própria da subida a Mestres/Pro (usam-se no máximo 15 segundos). As celebrações incorporadas são recriações, não animações oficiais.
-- Pré-visualizar, exportar uma imagem PNG ou gerar o vídeo. Manter o separador visível durante a gravação; mudar de separador cancela-a para evitar vídeos incompletos.
-- Guardar o projeto em JSON: inclui cenas, posições, ícones, template personalizado e fonte personalizada. Música e vídeo final devem ser selecionados novamente quando abres o projeto.
+- Choose 1–12 scenes (five by default). Each has a final Rank Score, points earned, still image, optional rank icons, and duration. Scores jump at scene boundaries; every still gets a gradual zoom in the preview and MP4.
+- Upload a different screenshot per scene or replace the common template. The supplied base screenshot keeps its original Brawlers; separate Brawler/skin replacement remains future work.
+- Upload transparent rank icons. Icon files with rank names (Bronze, Silver, Gold, Diamond, Mythic, Legendary, Masters, Pro) automatically match the rank derived from each scene's score; individual selectors can override that. Fine-tune pixel coordinates under “Fine-tune positions.” Icons are not bundled.
+- “Generate 5 scores” is an editable starting example. The +100 sample is **not** an official average. Supercell says gains depend on opponent Rank Score and Rank Boost. Review each score and earned amount against your real results.
+- Upload your own ending clip (MP4/WebM, up to 60 seconds) and optional background music. The server joins the complete ending after the zoom shots, preserves its audio, and mixes it with optional music. Alternatively use a recreated Masters/Pro end card or no ending. Switching browser tabs does not cancel server rendering.
+- Save/open JSON projects with scene images, icons, template, and layout. Re-upload music and ending video after opening a project. Export a still PNG or an MP4 at 720p/1080p, portrait or landscape.
 
-Os Brawlers continuam os do template, conforme combinado. A troca de Brawlers/skins fica para a próxima etapa. A fidelidade depende da imagem, dos ícones e da fonte carregados; não há garantia de identidade pixel a pixel com o jogo.
+The score bands follow Supercell's [Ranked support page](https://support.supercell.com/brawl-stars/en/articles/about-ranked-3.html): Bronze 0, Silver 750, Gold 1500, Diamond 3000, Mythic 4500, Legendary 6000, Masters 8500, Pro 11250. The support page has inconsistent boundary wording near Gold and Masters; these are the stated starting thresholds. The [Ranked 2025 update](https://supercell.com/en/games/brawlstars/blog/release-notes/ranked-rework-2025/) covers the newer Pro rank and variable point gains. The editor uses major ranks rather than minor divisions.
 
-## Ficheiros
+Files: `main.py` handles login and video rendering, `templates/` contains both HTML pages, `static/` contains the editor and bundled base artwork, and `tests/browser.cjs` exercises the app in Chromium. No rank icons, official animations, or external data service are included.
 
-- `main.py`: servidor HTTP e conversão MP4.
-- `static/index.html`, `style.css`, `app.js`: editor e gravação Canvas/MediaRecorder.
-- `static/template.png`: imagem base aprovada.
-- `static/game.ttf`: Lilita One, distribuída sob SIL Open Font License (`static/FONT-LICENSE.txt`); podes carregar outra fonte.
-- `requirements.txt`: FFmpeg portátil para exportar MP4.
-- `Dockerfile`: arranque em Python com porta 80.
-
-O site não inclui login. Não há API de Brawl Stars, autenticação GitHub ou tokens guardados na aplicação. Usa os ficheiros de imagem, áudio e vídeo que tenhas autorização para usar.
-
-## Estado desta versão
-
-Versão inicial pronta para instalar. Verificações feitas: sintaxe Python/JavaScript, navegador Chromium em desktop e telemóvel, sequência de cinco cenas, exportação MP4 H.264, alterações de formato, cancelamento e gravação/reabertura do projeto. O teste de áudio e gravação final é incluído em `tests/browser.cjs`.
-
-Para repetir os testes de navegador, instala Playwright no ambiente de desenvolvimento e executa `TEST_PORT=18080 node tests/browser.cjs` com FFmpeg/ffprobe disponíveis. Podes indicar `CHROME_PATH` para um navegador local. Esta porta é apenas do teste; a aplicação continua a usar 80 por defeito. A hospedagem tem de permitir bind na porta 80.
-
-Não foi feita publicação na hospedagem. Não foram fornecidos ícones oficiais nem uma gravação própria da subida de rank; estes podem ser carregados no editor.
+Run the browser check with Playwright, Chromium, FFmpeg, and ffprobe installed: `TEST_PORT=18080 CHROME_PATH=/path/to/chromium node tests/browser.cjs`. Port 18080 is only for testing; the app defaults to 80.
