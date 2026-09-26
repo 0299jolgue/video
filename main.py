@@ -57,6 +57,15 @@ def require_login():
     return redirect(url_for('login'))
 
 
+@app.after_request
+def fresh_editor_assets(response):
+    # A deployment can replace HTML and JS together. Stale cached assets leave
+    # the editor on its initial Loading message after a new release.
+    if request.path in ('/', '/login', '/app.js', '/style.css'):
+        response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -78,7 +87,7 @@ def logout():
 
 @app.get('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', asset_version=int((BASE / 'static' / 'app.js').stat().st_mtime))
 
 
 @app.get('/api/health')

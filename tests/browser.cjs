@@ -17,6 +17,7 @@ const probe=file=>JSON.parse(execFileSync('ffprobe',['-v','error','-show_streams
   browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||undefined,args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const page=await browser.newPage({viewport:{width:1440,height:1000},acceptDownloads:true});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>{globalThis.structuredClone=undefined});
   await page.goto(origin+'/');assert.ok(page.url().endsWith('/login'));
   await page.fill('[name=username]','admin');await page.fill('[name=password]','admin123');await page.click('button[type=submit]');
   await page.waitForFunction(()=>document.querySelector('#status')?.textContent.startsWith('Ready.'));
