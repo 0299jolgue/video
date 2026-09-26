@@ -9,9 +9,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
-For Docker: `docker build -t rank-video .` followed by `docker run --rm -p 80:80 rank-video`. Set `PORT` only for local development. The hosting entry point is `main.py` and its default port is 80, not 8080. FFmpeg renders H.264 MP4; `imageio-ffmpeg` supplies a binary if the system has none.
+For Docker: `docker build -t rank-video .` followed by `docker run --rm -p 80:80 rank-video`. Set `PORT` only for local development. The hosting entry point is `main.py` and its default port is 80, not 8080. The HTTP server and login use only Python's standard library, so the site can start before optional video dependencies are available. FFmpeg renders H.264 MP4; `imageio-ffmpeg` supplies a binary if the system has none.
 
-Sign in with the temporary account **admin / admin123**. Set `ADMIN_USER`, `ADMIN_PASSWORD`, and `SESSION_SECRET` as environment variables to change it and retain sessions across restarts.
+Sign in with the temporary account **admin / admin123**. Set `ADMIN_USER` and `ADMIN_PASSWORD` as environment variables to change it. Sessions live in the server's memory and require signing in again after a restart.
 
 ## Editing
 
