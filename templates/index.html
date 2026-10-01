@@ -1,39 +1,319 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10131b"><title>Rank Clip Studio</title><link rel="stylesheet" href="/style.css"></head><body><div class="app">
-<header><div class="brand"><span class="logo">▶</span><div><h1>Rank Clip <em>Studio</em></h1><p>Build your ranked victory video.</p></div></div><div class="header-actions"><span class="pill" id="engine">Loading…</span><form action="/logout" method="post"><button class="ghost" type="submit">Log out</button></form></div></header>
-<main><section class="workspace"><div class="section-heading"><div><span class="eyebrow">YOUR VIDEO</span><h2>Five wins. One final rank.</h2></div><button id="play" class="ghost">▶ Preview</button></div>
-<div class="stage"><canvas id="canvas" width="1080" height="1920" aria-label="Video preview"></canvas><div class="stage-note" id="frameLabel">Scene 1 · 1080 × 1920</div></div>
-<div class="timeline-head"><h3>Scene timeline</h3><span id="durationLabel"></span></div><div id="timeline" class="timeline"></div>
-<div class="timeline-actions"><button id="add" class="ghost">＋ Add scene</button><button id="duplicate" class="ghost">Duplicate</button><button id="delete" class="ghost danger">Remove</button></div>
-<div class="status" role="status" aria-live="polite"><span class="status-dot"></span><span id="status">Loading template…</span></div><progress id="progress" value="0" max="1" hidden></progress><div id="downloads" class="downloads" hidden><a id="download" class="download" download="rank-clip.mp4">↓ Download MP4</a></div>
-</section><aside>
-<section class="panel"><div class="panel-heading"><span class="step">01</span><h2 id="sceneTitle">Scene 1</h2></div><p class="hint" id="rankName">Gold III → Diamond I</p>
-<div class="row"><label>Points after the match<input id="score" type="number" min="0" max="999999" value="2683"></label><label>Points earned<input id="gained" type="number" min="0" max="99999" value="116"></label></div><p class="hint">Each scene shows its final score immediately. The next scene changes it in one step.</p>
-<div class="row"><label>Current division starts at<input id="lower" type="number" value="2500" readonly></label><label>Next division starts at<input id="upper" type="number" value="3000" readonly></label></div>
-<div class="row"><label>Current rank icon<select id="leftIcon"><option value="auto">Auto (uploaded icons)</option><option value="">No icon</option></select></label><label>Next rank icon<select id="rightIcon"><option value="auto">Auto (uploaded icons)</option><option value="">No icon</option></select></label></div>
-<div class="row"><label>Scene duration<select id="seconds"><option value="1">1 second</option><option value="2" selected>2 seconds</option><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="5">5 seconds</option></select></label><label class="check"><input id="thresholds" type="checkbox" checked>Show rank thresholds</label></div><label class="check"><input id="showGain" type="checkbox" checked>Show points earned (+)</label>
-<label class="upload">Replace this scene image<small id="sceneImageName">Uses the approved template</small><input id="sceneFile" type="file" accept="image/*"></label>
-</section>
-<section class="panel"><div class="panel-heading"><span class="step">02</span><h2>Create your five scenes</h2></div><div class="row"><label>First scene score<input id="startScore" type="number" value="2683" min="0"></label><label>Example points per win<input id="suggestedGain" type="number" value="100" min="1"></label></div><button id="generate" class="ghost wide">Generate 5 scores</button><p class="hint">+100 is only an editable example. Supercell does not publish a fixed average per rank: gains depend on your opponents and rank boost. Review each result and enter your real values.</p>
-</section>
-<section class="panel"><div class="panel-heading"><span class="step">03</span><h2>Assets and audio</h2></div><div class="uploads"><label class="upload">＋ Rank icons<small>Upload icons named Gold III, Diamond I, etc. Generic Gold or Diamond files also work. Placement is automatic.</small><input id="icons" type="file" accept="image/png,image/webp,image/jpeg" multiple></label><label class="upload">Default scene image<small id="templateName">Approved image included</small><input id="templateFile" type="file" accept="image/*"></label><label class="upload">Music<small id="musicName">Optional background audio</small><input id="musicFile" type="file" accept="audio/*"></label><label class="upload">Score font<small id="fontName">Game-style font included · TTF / WOFF</small><input id="fontFile" type="file" accept=".ttf,.otf,.woff,.woff2"></label></div><p class="hint">Rank scores, gains, division thresholds and uploaded icons use the fixed positions measured from the reference image. Each scene image gets a gradual zoom.</p></section>
-<section class="panel"><div class="panel-heading"><span class="step">04</span><h2>Final video and export</h2></div><label>Ending<select id="celebration"><option value="none">No ending</option><option value="masters">Recreated Masters card</option><option value="pro">Recreated Pro card</option><option value="custom">My own rank-up video</option></select></label><label class="upload" id="finalUpload">Upload your rank-up video<small id="finalName">MP4 / WebM · up to 60 seconds</small><input id="finalFile" type="file" accept="video/*"></label>
-<div class="row"><label>Format<select id="format"><option value="vertical">Vertical · 9:16</option><option value="original">Original · 3:2</option></select></label><label>Resolution<select id="quality"><option value="720">720p · faster</option><option value="1080" selected>1080p · best</option></select></label></div><label>Vertical background<select id="backdrop"><option value="black">Black · like the example</option><option value="blur">Blurred scene</option></select></label><label>Video caption<input id="caption" type="text" maxlength="80" value="Join: discord.gg/jolgue" placeholder="Your Discord invite"></label>
-<div class="row"><button id="png" class="ghost">↓ Save frame PNG</button><button id="save" class="ghost">Save project</button></div><label class="sub-link import-label">Open saved project<input id="projectFile" type="file" accept="application/json,.json"></label><button id="export" class="primary">Create MP4 <span>↗</span></button><button id="cancel" class="ghost" hidden>Cancel export</button><p class="hint">The server renders the five zoom shots, joins your ending video and mixes the audio. You can switch tabs while it works.</p></section>
-<details class="panel"><summary>Optional: adjust positions for a different template</summary><p class="hint">Defaults match the original rank-result screenshot (1534 × 1025 clean plate).</p><div id="positions"></div><button id="resetPositions" class="ghost">Restore screenshot positions</button></details>
-</aside></main><footer>Rank Clip Studio · Independent fan-made editor · <a href="https://support.supercell.com/brawl-stars/en/articles/about-ranked-3.html" target="_blank" rel="noopener noreferrer">Supercell rank-score reference</a></footer></div>
-<script>
-(() => {
-  const report = () => {
-    const status = document.getElementById('status');
-    if (status && status.textContent === 'Loading template…') status.textContent = 'The editor could not start. Reload this page; if it continues, contact the site owner.';
-    const engine = document.getElementById('engine');
-    if (engine && engine.textContent === 'Loading…') engine.textContent = 'UNAVAILABLE';
-  };
-  window.addEventListener('error', event => {
-    if (event.target && event.target.tagName === 'SCRIPT') report();
-    if (event.message) report();
-  }, true);
-  setTimeout(report, 12000);
-})();
-</script>
-<script src="/app.js?v={{ asset_version }}"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#10131b" />
+    <title>Rank Clip Studio</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div class="brand">
+          <span class="logo">▶</span>
+          <div>
+            <h1>Rank Clip <em>Studio</em></h1>
+            <p>Build your ranked victory video.</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <span class="pill" id="engine">Loading…</span>
+          <form action="/logout" method="post">
+            <button class="ghost" type="submit">Log out</button>
+          </form>
+        </div>
+      </header>
+      <main>
+        <section class="workspace">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">YOUR VIDEO</span>
+              <h2>Five wins. One final rank.</h2>
+            </div>
+            <button id="play" class="ghost">▶ Preview</button>
+          </div>
+          <div class="stage">
+            <canvas
+              id="canvas"
+              width="1080"
+              height="1920"
+              aria-label="Video preview"
+            ></canvas>
+            <div class="stage-note" id="frameLabel">Scene 1 · 1080 × 1920</div>
+          </div>
+          <div class="timeline-head">
+            <h3>Scene timeline</h3>
+            <span id="durationLabel"></span>
+          </div>
+          <div id="timeline" class="timeline"></div>
+          <div class="timeline-actions">
+            <button id="add" class="ghost">＋ Add scene</button
+            ><button id="duplicate" class="ghost">Duplicate</button
+            ><button id="delete" class="ghost danger">Remove</button>
+          </div>
+          <div class="status" role="status" aria-live="polite">
+            <span class="status-dot"></span
+            ><span id="status">Loading template…</span>
+          </div>
+          <progress id="progress" value="0" max="1" hidden></progress>
+          <div id="downloads" class="downloads" hidden>
+            <a id="download" class="download" download="rank-clip.mp4"
+              >↓ Download MP4</a
+            >
+          </div>
+        </section>
+        <aside>
+          <section class="panel">
+            <div class="panel-heading">
+              <span class="step">01</span>
+              <h2 id="sceneTitle">Scene 1</h2>
+            </div>
+            <p class="hint" id="rankName">Gold III → Diamond I</p>
+            <div class="row">
+              <label
+                >Points after the match<input
+                  id="score"
+                  type="number"
+                  min="0"
+                  max="999999"
+                  value="2683" /></label
+              ><label
+                >Points earned<input
+                  id="gained"
+                  type="number"
+                  min="0"
+                  max="99999"
+                  value="116"
+              /></label>
+            </div>
+            <p class="hint">
+              Each scene shows its final score immediately. The next scene
+              changes it in one step.
+            </p>
+            <div class="row">
+              <label
+                >Current division starts at<input
+                  id="lower"
+                  type="number"
+                  value="2500"
+                  readonly /></label
+              ><label
+                >Next division starts at<input
+                  id="upper"
+                  type="number"
+                  value="3000"
+                  readonly
+              /></label>
+            </div>
+            <div class="row">
+              <label
+                >Current rank icon<select id="leftIcon">
+                  <option value="auto">Auto (uploaded icons)</option>
+                  <option value="">No icon</option>
+                </select></label
+              ><label
+                >Next rank icon<select id="rightIcon">
+                  <option value="auto">Auto (uploaded icons)</option>
+                  <option value="">No icon</option>
+                </select></label
+              >
+            </div>
+            <div class="row">
+              <label
+                >Scene duration<select id="seconds">
+                  <option value="1">1 second</option>
+                  <option value="2" selected>2 seconds</option>
+                  <option value="3">3 seconds</option>
+                  <option value="4">4 seconds</option>
+                  <option value="5">5 seconds</option>
+                </select></label
+              ><label class="check"
+                ><input id="thresholds" type="checkbox" checked />Show rank
+                thresholds</label
+              >
+            </div>
+            <label class="check"
+              ><input id="showGain" type="checkbox" checked />Show points earned
+              (+)</label
+            >
+            <label class="upload"
+              >Replace this scene image<small id="sceneImageName"
+                >Uses the approved template</small
+              ><input id="sceneFile" type="file" accept="image/*"
+            /></label>
+          </section>
+          <section class="panel">
+            <div class="panel-heading">
+              <span class="step">02</span>
+              <h2>Create your five scenes</h2>
+            </div>
+            <div class="row">
+              <label
+                >First scene score<input
+                  id="startScore"
+                  type="number"
+                  value="2683"
+                  min="0" /></label
+              ><label
+                >Example points per win<input
+                  id="suggestedGain"
+                  type="number"
+                  value="100"
+                  min="1"
+              /></label>
+            </div>
+            <button id="generate" class="ghost wide">Generate 5 scores</button>
+            <p class="hint">
+              +100 is only an editable example. Supercell does not publish a
+              fixed average per rank: gains depend on your opponents and rank
+              boost. Review each result and enter your real values.
+            </p>
+          </section>
+          <section class="panel">
+            <div class="panel-heading">
+              <span class="step">03</span>
+              <h2>Assets and audio</h2>
+            </div>
+            <div class="uploads">
+              <label class="upload"
+                >＋ Rank icons<small
+                  >Upload icons named Gold III, Diamond I, etc. Generic Gold or
+                  Diamond files also work. Placement is automatic.</small
+                ><input
+                  id="icons"
+                  type="file"
+                  accept="image/png,image/webp,image/jpeg"
+                  multiple /></label
+              ><label class="upload"
+                >Default scene image<small id="templateName"
+                  >Approved image included</small
+                ><input id="templateFile" type="file" accept="image/*" /></label
+              ><label class="upload"
+                >Music<small id="musicName">Optional background audio</small
+                ><input id="musicFile" type="file" accept="audio/*" /></label
+              ><label class="upload"
+                >Score font<small id="fontName"
+                  >Game-style font included · TTF / WOFF</small
+                ><input
+                  id="fontFile"
+                  type="file"
+                  accept=".ttf,.otf,.woff,.woff2"
+              /></label>
+            </div>
+            <p class="hint">
+              Rank scores, gains, division thresholds and uploaded icons use the
+              fixed positions measured from the reference image. Each scene
+              image gets a gradual zoom.
+            </p>
+          </section>
+          <section class="panel">
+            <div class="panel-heading">
+              <span class="step">04</span>
+              <h2>Final video and export</h2>
+            </div>
+            <label
+              >Ending<select id="celebration">
+                <option value="none">No ending</option>
+                <option value="masters">Recreated Masters card</option>
+                <option value="pro">Recreated Pro card</option>
+                <option value="custom">My own rank-up video</option>
+              </select></label
+            ><label class="upload" id="finalUpload"
+              >Upload your rank-up video<small id="finalName"
+                >MP4 / WebM · up to 60 seconds</small
+              ><input id="finalFile" type="file" accept="video/*"
+            /></label>
+            <div class="row">
+              <label
+                >Format<select id="format">
+                  <option value="vertical">Vertical · 9:16</option>
+                  <option value="original">Original · 3:2</option>
+                </select></label
+              ><label
+                >Resolution<select id="quality">
+                  <option value="720">720p · faster</option>
+                  <option value="1080" selected>1080p · best</option>
+                </select></label
+              >
+            </div>
+            <label
+              >Vertical background<select id="backdrop">
+                <option value="black">Black · like the example</option>
+                <option value="blur">Blurred scene</option>
+              </select></label
+            ><label
+              >Video caption<input
+                id="caption"
+                type="text"
+                maxlength="80"
+                value="Join: discord.gg/jolgue"
+                placeholder="Your Discord invite"
+            /></label>
+            <div class="row">
+              <button id="png" class="ghost">↓ Save frame PNG</button
+              ><button id="save" class="ghost">Save project</button>
+            </div>
+            <label class="sub-link import-label"
+              >Open saved project<input
+                id="projectFile"
+                type="file"
+                accept="application/json,.json" /></label
+            ><button id="export" class="primary">
+              Create MP4 <span>↗</span></button
+            ><button id="cancel" class="ghost" hidden>Cancel export</button>
+            <p class="hint">
+              The server renders the five zoom shots, joins your ending video
+              and mixes the audio. You can switch tabs while it works.
+            </p>
+          </section>
+          <details class="panel">
+            <summary>
+              Optional: adjust positions for a different template
+            </summary>
+            <p class="hint">
+              Defaults match the original rank-result screenshot (1534 × 1025
+              clean plate).
+            </p>
+            <div id="positions"></div>
+            <button id="resetPositions" class="ghost">
+              Restore screenshot positions
+            </button>
+          </details>
+        </aside>
+      </main>
+      <footer>
+        Rank Clip Studio · Independent fan-made editor ·
+        <a
+          href="https://support.supercell.com/brawl-stars/en/articles/about-ranked-3.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Supercell rank-score reference</a
+        >
+      </footer>
+    </div>
+    <script>
+      (() => {
+        const report = () => {
+          const status = document.getElementById("status");
+          if (status && status.textContent === "Loading template…")
+            status.textContent =
+              "The editor could not start. Reload this page; if it continues, contact the site owner.";
+          const engine = document.getElementById("engine");
+          if (engine && engine.textContent === "Loading…")
+            engine.textContent = "UNAVAILABLE";
+        };
+        window.addEventListener(
+          "error",
+          (event) => {
+            if (event.target && event.target.tagName === "SCRIPT") report();
+            if (event.message) report();
+          },
+          true,
+        );
+        setTimeout(report, 12000);
+      })();
+    </script>
+    <script src="/app.js?v={{ asset_version }}"></script>
+  </body>
+</html>
